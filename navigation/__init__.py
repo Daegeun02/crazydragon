@@ -54,7 +54,7 @@ class Navigation( Thread ):
         if self.packet is not None:
             packet = self.packet
 
-            packet._enroll( 4*12, self.header )
+            packet._enroll( 12, self.header )
 
         while self.AllGreen:
 
