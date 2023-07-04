@@ -24,7 +24,7 @@ from .optimus_prime import _command_is_not_in_there
 zero = zeros( 3 )
 
 
-class Commander(Thread):
+class Controller(Thread):
     
     
     def __init__(self, scf, dt, control_type='ENU'):
