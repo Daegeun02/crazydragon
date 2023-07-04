@@ -1,96 +1,73 @@
-## Threading
 from threading import Thread
 
-
-## define Hz of loop
 from time import sleep
 
-
-## for copy memory
 from numpy import array, zeros
 
-
-## control loop
 from .integral_loop import _dot_thrust
-from .integral_loop import _thrust_clip, alpha
+from .integral_loop import _thrust_clip
 
-
-## transformer
-from .optimus_prime import _command_as_ENU, _command_as_RPY
+from .optimus_prime import _command_as_RPY
 from .optimus_prime import _command_is_not_in_there
 
+from .constants import *
 
 
-zero = zeros( 3 )
+
+acc_cmd = zeros(3)
 
 
-class Controller(Thread):
+class Controller( Thread ):
     
     
-    def __init__(self, scf, dt, control_type='ENU'):
-        ## for threading
-        super().__init__()
-        self.daemon = True
+    def __init__( self, scf, dt ):
+
+        super().__init__( self, daemon=True )
 
         ## crazyflie
         self.cf = scf.cf
         ## time step
         self.dt = dt
 
-        self.thrust = array([alpha * 9.81], dtype=int)
+        self.thrust = array( [alpha * 9.81], dtype=int )
         ## memory that restores thrust command
         self.ready_for_command = False
-        ## command coord
-        self.control_type = control_type
         ## store commands
-        self.command = zeros(4)
+        self.command = zeros( 4 )
     
 
-    def run(self):
+    def run( self ):
         ## initialize
         cf      = self.cf
-        ## target function -> send setpoint
-        target  = None
-        ## control type
-        if self.control_type == 'ENU':
-            ## control function
-            target = self._send_setpoint_ENU
-        elif self.command_type == 'RPY':
-            ## control function
-            target = self._send_setpoint_RPY
-            ## initialize command
-            cf.command = array([0,0,0,0])
-        else:
-            raise ValueError('not supported control type')
 
-        print('ready for guidance start')
+        print( 'ready for guidance start' )
     
         ## wait until start flag on
         while not self.ready_for_command:
-            sleep(0.1)
+            sleep( 0.1 )
 
-        print('guidance is on, start to send command')
+        print( 'guidance is on, start to send command' )
 
         ## start flag is on
         while self.ready_for_command:
             ## read command
-            command = array( cf.command )
+            acc_cmd[:] = cf.command
             ## call control function
-            target( command )
+            self._send_setpoint_ENU( acc_cmd )
 
-        print('mission finished')
+        print( 'mission finished' )
 
     
-    def init_send_setpoint(self):
+    def init_send_setpoint( self ):
         ## commander
         commander = self.cf.commander
         ## initialize
-        commander.send_setpoint(0, 0, 0, 0)
+        commander.send_setpoint( 0, 0, 0, 0 )
         self.ready_for_command = True
 
     
     ## commander should be given in ENU
-    def _send_setpoint_ENU(self, acc_cmd, n=5):
+    def _send_setpoint_ENU( self, acc_cmd, n=5 ):
         ## crazyflie
         cf = self.cf
         ## commander
@@ -107,7 +84,7 @@ class Controller(Thread):
         acc_cmd = _command_is_not_in_there( euler_cur, acc_cmd )
         _command_as_RPY( acc_cmd, command )
 
-        if ( acc_cmd == zero ):
+        if ( acc_cmd[2] == 0 ):
             sleep( dt )
             return 
 
@@ -127,40 +104,10 @@ class Controller(Thread):
                 thrust[0]           ## thrust
             )
 
-            sleep(dt)
+            sleep( dt )
 
 
-    ## command should be given in RPY, T
-    def _send_setpoint_RPY(self, command, n=5):
-        ## crazyflie
-        cf = self.cf
-        ## commander
-        commander = cf.commander
-        ## timestep
-        dt = self.dt / n
-        ## current state
-        acc_cur = cf.acc
-
-        for _ in range(n):
-
-            ## closed loop
-            self.thrust += _dot_thrust(command, acc_cur)      ## integration
-
-            ## cliping
-            thrust = _thrust_clip(self.thrust)
-
-            ## input
-            commander.send_setpoint(
-                command[0],         ## roll
-                command[1],         ## pitch
-                command[2],         ## yawRate
-                thrust              ## thrust
-            )
-
-            sleep(dt)
-
-
-    def stop_send_setpoint(self):
+    def stop_send_setpoint( self ):
         ## commander
         commander = self.cf.commander
         ## stop command

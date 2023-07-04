@@ -32,8 +32,8 @@ class Navigation( Thread ):
         self.packet = _Packet( port, baud, timeout=1 )
 
 
-    @staticmethod
-    def _on_pose( cf, data: list ):
+    @classmethod
+    def _on_pose( cls, cf, data: list ):
         
         cf.pos[:] = data[0:3]
         cf.rpy[:] = data[3:6]
@@ -49,9 +49,10 @@ class Navigation( Thread ):
         self.imu.start_get_vel()
         self.imu.start_get_acc()
 
-        self.qtm.on_pose = lambda data: self._on_pose( self.cf, data )
+        self.qtm.on_pose = lambda data: self.__class__._on_pose( self.cf, data )
 
         if self.packet is not None:
+
             packet = self.packet
 
             packet._enroll( 12, self.header )

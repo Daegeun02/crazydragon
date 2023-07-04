@@ -9,10 +9,10 @@ from numpy.linalg import norm
 def _command_is_not_in_there( euler, acc_cmd ):
     ## yaw position
     yaw = euler[2]              ## [deg]
-    yaw = deg2rad(yaw)          ## [rad]
+    yaw = deg2rad( yaw )        ## [rad]
 
     ## basic
-    cy, sy = cos(yaw), sin(yaw)
+    cy, sy = cos( yaw ), sin( yaw )
 
     ## update
     aE = cy * acc_cmd[0] + sy * acc_cmd[1]
@@ -62,52 +62,4 @@ def _command_as_RPY( acc_cmd, command ):
     command[0] = rad2deg( roll_in_rad )             ## [deg]
 
     ## acc strength
-    command[3] = norm(acc_cmd)                           ## m/s^2
-
-
-def _command_as_ENU( command, acc_cmd ):
-    """
-    this function translate command about drone's body coordinate,
-    to ENU coordinate
-
-    command:
-    1. roll
-    2. pitch
-    3. yaw
-    4. acc
-    """
-    ## unpack command
-    roll, pitch, yaw, acc_str = command       ## [deg]
-
-    ## deg to rad
-    roll  = deg2rad( roll )                   ## [rad]
-    pitch = deg2rad( pitch )                  ## [rad]
-
-    ## basic
-    cr, sr = cos( roll ) , sin( roll )
-    cp, sp = cos( pitch ), sin( pitch )
-
-    ## calculate ENU command
-    acc_cmd[0] = acc_str * cr * sp
-    acc_cmd[1] = acc_str * sr * (-1)
-    acc_cmd[2] = acc_str * cr * cp
-
-
-
-if __name__ == "__main__":
-    from numpy import array, float64
-    from numpy import random
-
-    acc = random.rand(3) * 10
-    acc = array([-0.1,0,10])
-    cmd = array([0,0,0,0], dtype=float64)
-
-    _command_as_RPY( acc, cmd )
-    print(acc, cmd)
-    _command_as_ENU( cmd, acc )
-    print(acc, cmd)
-
-    _command_as_RPY( acc, cmd )
-    print(acc, cmd)
-    _command_as_ENU( cmd, acc )
-    print(acc, cmd)
+    command[3] = norm( acc_cmd )                    ## m/s^2

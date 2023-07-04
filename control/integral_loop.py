@@ -1,24 +1,10 @@
 from numpy.linalg import norm
 
-from constants import read_constant
+from .constants import *
 
-_const = read_constant('thrust')
-## thrust factor constant
-alpha  = _const["alpha"]
-## P loop constant
-Kp     = _const["Kp"]
 
-_const = read_constant('gravity')
-## gravity constant
-g      = _const["g"]
-
-## thrust factor constant
-alpha = (45000/9.81)
-## P loop constant
-Kp = 0.1 
 
 K_T = alpha * Kp
-
 
 
 def _dot_thrust(command, acc_cur):
