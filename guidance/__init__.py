@@ -26,6 +26,9 @@ class Guidance( Thread ):
         self.packet = _Packet( port, baud, timeout=1 )
 
 
+    ## command Rx
+
+
     def run( self ):
 
         acc_cmd = self.cf.command
