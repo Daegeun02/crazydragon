@@ -19,7 +19,12 @@ nav_config = {
 }
 
 ctr_config = {
-    'scf': None
+    'header': array([26, 4]).tobytes(),
+    'scf'   : None,
+    'dt'    : 0.1,
+    'Hz'    : 5,
+    'port'  : '/dev/ttyUSB0',
+    'baud'  : 115200
 }
 
 uri1 = uri_helper.uri_from_env(default='radio://0/65/2M/E7E7E7E707')
