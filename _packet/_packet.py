@@ -21,8 +21,6 @@ class _Packet( Serial ):
         self.RxHeader = ( header.astype( uint8 ) ).tobytes()
         self.RxBfsize = size
 
-        self.parser   = None
-
 
     def _sendto( self ):
 
@@ -38,8 +36,6 @@ class _Packet( Serial ):
         size     = self.RxBfsize         ## float
 
         hdrf = 0
-
-        data = None
 
         while True:
 
