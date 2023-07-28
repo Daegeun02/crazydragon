@@ -39,6 +39,15 @@ class Controller( Thread ):
 
         self.packet = _Packet( port, baud, timeout=1 )
 
+        packet = self.packet
+
+        packet._enroll_receiver( 3, self.header )
+
+        thread = Thread( target=packet._recvfrom, args=(), daemon=True )
+
+        thread.start()
+
+
 
     def init_send_setpoint( self ):
         ## commander
@@ -60,6 +69,8 @@ class Controller( Thread ):
 
     def run( self ):
 
+        packet = self.packet
+
         cf = self.cf
         commander = cf.commander
         n  = self.n
@@ -77,7 +88,7 @@ class Controller( Thread ):
 
         while self.ready_for_command:
 
-            acc_cmd[:] = cf.command
+            acc_cmd[:] = packet.RxData
 
             _command_is_not_in_there( acc_cmd, att_cur )
 
