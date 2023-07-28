@@ -41,7 +41,7 @@ class Controller( Thread ):
 
         packet = self.packet
 
-        packet._enroll_receiver( 3, self.header )
+        packet._enroll_receiver( 3*4, self.header )
 
         thread = Thread( target=packet._recvfrom, args=(), daemon=True )
 

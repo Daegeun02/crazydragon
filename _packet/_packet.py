@@ -35,37 +35,31 @@ class _Packet( Serial ):
 
         RxData   = self.RxData
         RxHeader = self.RxHeader
-        size     = self.RxBfsize * 4        ## float
+        size     = self.RxBfsize         ## float
 
         hdrf = 0
-        idxn = 0
 
         data = None
-        buff = None
 
         while True:
 
             if self.readable():
-                data = self.read()
 
                 if ( hdrf == 2 ):
-                    if ( idxn < size ):
-                        buff[idxn] = data
-                        idxn += 1
 
-                        if ( idxn == size ):
-                            hdrf = 0
-                            idxn = 0
+                    data = self.read( size )
 
-                            RxData[:] = frombuffer( buff, dtype=float32 )
+                    RxData[:] = frombuffer( data, dtype=float32 )
 
                 elif ( hdrf == 0 ):
+                    data = self.read()
                     if ( data == RxHeader[0] ):
                         hdrf = 1
 
                 elif ( hdrf == 1 ):
+                    data = self.read()
                     if ( data == RxHeader[1] ):
                         hdrf = 2
-                    
+
                 else:
                     hdrf = 0
