@@ -44,7 +44,7 @@ class Navigation( Thread ):
         pos = self.cf.pos
         vel = self.cf.vel
         acc = self.cf.acc
-        rpy = self.cf.rpy
+        att = self.cf.rpy
 
         self.imu.start_get_vel()
         self.imu.start_get_acc()
@@ -62,7 +62,7 @@ class Navigation( Thread ):
             packet.TxData[0:3] = pos
             packet.TxData[3:6] = vel
             packet.TxData[6:9] = acc
-            packet.TxData[9: ] = rpy
+            packet.TxData[9: ] = att
 
             packet._sendto()
 

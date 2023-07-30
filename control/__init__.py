@@ -14,6 +14,8 @@ from numpy import zeros, array
 
 from time import sleep
 
+_FLOAT=4
+
 
 
 class Controller( Thread ):
@@ -41,7 +43,7 @@ class Controller( Thread ):
 
         packet = self.packet
 
-        packet._enroll_receiver( 3*4, self.header )
+        packet._enroll_receiver( 3*_FLOAT, self.header )
 
         thread = Thread( target=packet._recvfrom, args=(), daemon=True )
 
