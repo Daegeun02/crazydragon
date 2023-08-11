@@ -5,6 +5,8 @@ from numpy import frombuffer
 from numpy import float32, uint8
 from numpy import ndarray
 
+_FLOAT=4
+
 
 
 class _Packet( Serial ):

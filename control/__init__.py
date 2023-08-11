@@ -1,5 +1,7 @@
 from threading import Thread
 
+from ..crazy import CrazyDragon
+
 from .integral_loop import _dot_thrust
 from .integral_loop import _thrust_clip
 
@@ -14,19 +16,19 @@ from numpy import zeros, array
 
 from time import sleep
 
-_FLOAT=4
+_FLOAT = 4
 
 
 
 class Controller( Thread ):
 
-    def __init__( self, config ):
+    def __init__( self, _cf: CrazyDragon, config ):
         
         super().__init__( self, daemon=True )
 
         self.packet = None
         self.header = config['header']
-        self.cf     = config['scf'].cf
+        self.cf     = _cf
         self.dt     = config['dt']
         self.n      = config['Hz']
 
@@ -66,12 +68,18 @@ class Controller( Thread ):
         self.cf.command[:] = zeros(3)
         ## stop signal
         self.ready_for_command = False
+
+        for _ in range( 50 ):
+            commander.send_setpoint( 0, 0, 0, 10001 )
+            sleep( 0.2 )
+
         commander.send_stop_setpoint()
 
 
     def run( self ):
 
         packet = self.packet
+        rxData = packet.RxData
 
         cf = self.cf
         commander = cf.commander
@@ -90,7 +98,7 @@ class Controller( Thread ):
 
         while self.ready_for_command:
 
-            acc_cmd[:] = packet.RxData
+            acc_cmd[:] = rxData
 
             _command_is_not_in_there( acc_cmd, att_cur )
 
@@ -110,7 +118,7 @@ class Controller( Thread ):
                     command[0],
                     command[1],
                     command[2],
-                    command[3]
+                    thrust[0]
                 )
 
                 sleep( dt )
