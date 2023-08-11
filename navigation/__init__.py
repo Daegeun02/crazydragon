@@ -1,5 +1,7 @@
 from threading import Thread
 
+from ..crazy import CrazyDragon
+
 from .imu       import IMU
 from .qualisys  import Qualisys
 
@@ -11,13 +13,13 @@ from time import sleep
 
 class Navigation( Thread ):
 
-    def __init__( self, config ):
+    def __init__( self, _cf: CrazyDragon, config ):
 
         super().__init__( self, daemon=True )
 
         self.packet = None
         self.header = config['header']
-        self.cf     = config['scf'].cf
+        self.cf     = _cf
 
         self.imu = IMU( config['scf'] )
         self.qtm = Qualisys( config['body_name'] )
@@ -33,10 +35,10 @@ class Navigation( Thread ):
 
 
     @classmethod
-    def _on_pose( cls, cf, data: list ):
+    def _on_pose( cls, cf: CrazyDragon, data: list ):
         
         cf.pos[:] = data[0:3]
-        cf.rpy[:] = data[3:6]
+        cf.att[:] = data[3:6]
 
     
     def run( self ):
@@ -44,7 +46,7 @@ class Navigation( Thread ):
         pos = self.cf.pos
         vel = self.cf.vel
         acc = self.cf.acc
-        att = self.cf.rpy
+        att = self.cf.att
 
         self.imu.start_get_vel()
         self.imu.start_get_acc()
