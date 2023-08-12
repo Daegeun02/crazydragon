@@ -1,4 +1,4 @@
-__version__ = '1.0.1'
+__version__ = '1.0.2'
 
 from .control import Controller
 
@@ -9,5 +9,7 @@ from .guidance import Guidance
 from .guidance import utils
 
 from .navigation import Navigation
+
+from .recorder import Recorder
 
 from .communication_test import *
