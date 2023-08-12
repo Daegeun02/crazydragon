@@ -1,7 +1,5 @@
 from threading import Thread
 
-from serial import Serial
-
 import xml.etree.cElementTree as ET
 
 import qtm

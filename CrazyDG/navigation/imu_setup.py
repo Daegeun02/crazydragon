@@ -1,3 +1,5 @@
+from ..crazy import CrazyDragon
+
 import time
 
 from cflib.crazyflie.log        import LogConfig
@@ -8,28 +10,28 @@ from cflib.crazyflie.syncLogger import SyncLogger
 orientation_std_dev = 8.0e-3
 
 
-def adjust_orientation_sensitivity(cf):
-    cf.param.set_value('locSrv.extQuatStdDev', orientation_std_dev)
+def adjust_orientation_sensitivity( cf: CrazyDragon ):
+    cf.param.set_value( 'locSrv.extQuatStdDev', orientation_std_dev   )
 
 
-def activate_kalman_estimator(cf):
-    cf.param.set_value('stabilizer.estimator', '2')
+def activate_kalman_estimator( cf: CrazyDragon ):
+    cf.param.set_value( 'stabilizer.estimator', '2' )
 
     # Set the std deviation for the quaternion data pushed into the
     # kalman filter. The default value seems to be a bit too low.
-    cf.param.set_value('locSrv.extQuatStdDev', 0.06)
+    cf.param.set_value( 'locSrv.extQuatStdDev', 0.06 )
 
 
-def reset_estimator(cf):
-    cf.param.set_value('kalman.resetEstimation', '1')
+def reset_estimator( cf: CrazyDragon ):
+    cf.param.set_value( 'kalman.resetEstimation', '1' )
     time.sleep(0.1)
-    cf.param.set_value('kalman.resetEstimation', '0')
+    cf.param.set_value( 'kalman.resetEstimation', '0' )
 
     # time.sleep(1)
-    wait_for_position_estimator(cf)
+    wait_for_position_estimator( cf )
 
 
-def wait_for_position_estimator(scf):
+def wait_for_position_estimator( cf: CrazyDragon ):
     print('Waiting for estimator to find position...')
 
     log_config = LogConfig(name='Kalman Variance', period_in_ms=10)
@@ -45,7 +47,7 @@ def wait_for_position_estimator(scf):
 
     threshold = 0.001
 
-    with SyncLogger(scf, log_config) as logger:
+    with SyncLogger( cf, log_config ) as logger:
         for log_entry in logger:
             data = log_entry[1]
 
