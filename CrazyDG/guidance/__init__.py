@@ -1,6 +1,6 @@
 from threading import Thread
 
-from _packet import _Packet
+from .._packet import _Packet
 
 from .utils import *
 

@@ -1,8 +1,8 @@
 
-from .goto import goto
+from ._goto import goto
 
-from .hover import hover
+from ._hover import hover
 
-from .landing import landing
+from ._landing import landing
 
-from .takeoff import takeoff
+from ._takeoff import takeoff

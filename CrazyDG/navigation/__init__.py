@@ -26,7 +26,7 @@ class Navigation( Thread ):
         self.imu = IMU( config['scf'] )
         self.qtm = Qualisys( config['body_name'] )
 
-        self.AllGreen = True
+        self.navigate = True
 
         self._on_link( config['port'], config['baud'] )
 
@@ -42,8 +42,12 @@ class Navigation( Thread ):
         cf.pos[:] = data[0:3]
         cf.att[:] = data[3:6]
 
+        cf.extpos.send_extpos( data[0], data[1], data[2] )
+
     
     def run( self ):
+
+        cf = self.cf
 
         pos = self.cf.pos
         vel = self.cf.vel
@@ -53,7 +57,7 @@ class Navigation( Thread ):
         self.imu.start_get_vel()
         self.imu.start_get_acc()
 
-        self.qtm.on_pose = lambda data: self.__class__._on_pose( self.cf, data )
+        self.qtm.on_pose = lambda data: __class__._on_pose( cf, data )
 
         if self.packet is not None:
 
@@ -61,7 +65,7 @@ class Navigation( Thread ):
 
             packet._enroll( 12, self.header )
 
-        while self.AllGreen:
+        while self.navigate:
 
             packet.TxData[0:3] = pos
             packet.TxData[3:6] = vel
@@ -71,3 +75,10 @@ class Navigation( Thread ):
             packet._sendto()
 
             sleep( 0.01 )
+
+    
+    def join( self ):
+
+        self.navigate = False
+
+        super().join()
