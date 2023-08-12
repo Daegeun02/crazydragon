@@ -21,7 +21,7 @@ class _Packet( Serial ):
 
         self.RxData   = zeros( size, dtype=float32 )
         self.RxHeader = ( header.astype( uint8 ) ).tobytes()
-        self.RxBfsize = size
+        self.RxBfsize = size * _FLOAT
 
 
     def _sendto( self ):
@@ -48,6 +48,8 @@ class _Packet( Serial ):
                     data = self.read( size )
 
                     RxData[:] = frombuffer( data, dtype=float32 )
+
+                    hdrf = 0
 
                 elif ( hdrf == 0 ):
                     data = self.read()

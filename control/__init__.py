@@ -10,7 +10,7 @@ from .optimus_prime import _command_is_not_in_there
 
 from constants import alpha
 
-from _packet import _Packet
+from .._packet import _Packet
 
 from numpy import zeros, array
 
@@ -32,6 +32,10 @@ class Controller( Thread ):
         self.dt     = config['dt']
         self.n      = config['Hz']
 
+        self.acc_cmd = zeros(3)
+        self.command = zeros(4)
+        self.thrust  = array( [alpha * 9.81], dtype=int )
+
         self.ready_for_command = False
 
         self.AllGreen = True
@@ -45,7 +49,7 @@ class Controller( Thread ):
 
         packet = self.packet
 
-        packet._enroll_receiver( 3*_FLOAT, self.header )
+        packet._enroll_receiver( 3, self.header )
 
         thread = Thread( target=packet._recvfrom, args=(), daemon=True )
 
@@ -71,7 +75,7 @@ class Controller( Thread ):
 
         for _ in range( 50 ):
             commander.send_setpoint( 0, 0, 0, 10001 )
-            sleep( 0.2 )
+            sleep( 0.05 )
 
         commander.send_stop_setpoint()
 
@@ -81,17 +85,17 @@ class Controller( Thread ):
         packet = self.packet
         rxData = packet.RxData
 
-        cf = self.cf
+        cf        = self.cf
         commander = cf.commander
         n  = self.n
         dt = self.dt / n
 
+        acc_cmd = self.acc_cmd
+        command = self.command
+        thrust  = self.thrust
+
         att_cur = cf.att
         acc_cur = cf.acc
-
-        acc_cmd = zeros(3)
-        command = zeros(4)
-        thrust  = array( [alpha * 9.81], dtype=int )
 
         while not self.ready_for_command:
             sleep( 0.1 )

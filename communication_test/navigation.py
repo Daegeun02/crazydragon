@@ -2,16 +2,13 @@ from threading import Thread
 
 from ..crazy import CrazyDragon
 
-from .imu       import IMU
-from .qualisys  import Qualisys
-
 from .._packet import _Packet
 
 from time import sleep
 
 
 
-class Navigation( Thread ):
+class Navigation_TEST( Thread ):
 
     def __init__( self, _cf: CrazyDragon, config ):
 
@@ -21,10 +18,8 @@ class Navigation( Thread ):
 
         self.packet = None
         self.header = config['header']
+        self.Hz     = config['Hz']
         self.cf     = _cf
-
-        self.imu = IMU( config['scf'] )
-        self.qtm = Qualisys( config['body_name'] )
 
         self.AllGreen = True
 
@@ -33,16 +28,8 @@ class Navigation( Thread ):
 
     def _on_link( self, port, baud ):
 
-        self.packet = _Packet( port, baud, timeout=1 )
+        self.packet = _Packet( port, baud, timeout=0.02 )
 
-
-    @classmethod
-    def _on_pose( cls, cf: CrazyDragon, data: list ):
-        
-        cf.pos[:] = data[0:3]
-        cf.att[:] = data[3:6]
-
-    
     def run( self ):
 
         pos = self.cf.pos
@@ -50,10 +37,7 @@ class Navigation( Thread ):
         acc = self.cf.acc
         att = self.cf.att
 
-        self.imu.start_get_vel()
-        self.imu.start_get_acc()
-
-        self.qtm.on_pose = lambda data: self.__class__._on_pose( self.cf, data )
+        dt = 1 / self.Hz
 
         if self.packet is not None:
 
@@ -61,13 +45,15 @@ class Navigation( Thread ):
 
             packet._enroll( 12, self.header )
 
+        txData = packet.TxData
+
         while self.AllGreen:
 
-            packet.TxData[0:3] = pos
-            packet.TxData[3:6] = vel
-            packet.TxData[6:9] = acc
-            packet.TxData[9: ] = att
+            txData[0:3] = pos
+            txData[3:6] = vel
+            txData[6:9] = acc
+            txData[9: ] = att
 
             packet._sendto()
 
-            sleep( 0.01 )
+            sleep( dt )
