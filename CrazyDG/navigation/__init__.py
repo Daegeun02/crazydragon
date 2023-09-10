@@ -40,6 +40,8 @@ class Navigation( Thread ):
         except:
             print( "without serial communication" )
 
+            self.connected = True
+
             self.packet = None
 
 
@@ -48,6 +50,17 @@ class Navigation( Thread ):
         self.packet._enroll( bytes, header )
 
         self.connected = True
+
+    
+    def transmit( self, _cf: CrazyDragon ) -> ndarray:
+
+        print( "\033[KTransmit function is not defined" )
+        print( "\033[KYou said that need serial communication" )
+        print( "\033[KYou don't make Transmit functon and overload it" )
+
+        print( "\033[Kfuncion should be like" )
+        print( "\033[KINPUT : CrazyDragon" )
+        print( "\033[KOUTPUT: numpy ndarray with size that you said in Navigation.connect funciont" )
 
 
     @classmethod
@@ -77,9 +90,7 @@ class Navigation( Thread ):
 
         packet = self.packet
 
-        pos = cf.pos
-        vel = cf.vel
-        att = cf.att
+        transmit = self.transmit
 
         if not self.connected:
             print( "warning: not connected with serial" ) 
@@ -88,9 +99,7 @@ class Navigation( Thread ):
 
             if ( packet != None ):
 
-                packet.TxData[0:3] = pos
-                packet.TxData[3:6] = vel
-                packet.TxData[6:9] = att
+                packet.TxData[:] = transmit( cf )
 
                 self.packet._sendto()
 

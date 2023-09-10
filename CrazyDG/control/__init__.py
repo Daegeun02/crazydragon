@@ -41,7 +41,9 @@ class Controller( Thread ):
 
             self.packet = _Packet( port=port, baudrate=baud )
 
-            self.connected = False
+            self.connected = True
+
+            self.parser = None
 
         except:
             print( "without serial communication" )
@@ -94,17 +96,19 @@ class Controller( Thread ):
         command = self.command
         thrust  = self.thrust
 
-        while not cf.ready_for_command:
-            sleep( 0.1 )
-
         packet = self.packet
 
         if self.connected:
-            Thread( target=packet.start_receive, args=[cf.command], daemon=True )
+            Thread( target=packet.start_receive, args=[cf.command,], daemon=True )
         else:
             print( "warning: not connected with serial" )
 
+
+        while not cf.ready_for_command:
+            sleep( 0.1 )
+
         print( 'controller starts working' )
+
 
         while cf.ready_for_command:
 
