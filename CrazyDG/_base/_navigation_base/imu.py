@@ -1,8 +1,8 @@
-from ..crazy import CrazyDragon
-
-from cflib.crazyflie.log import LogConfig
+from ...crazy import CrazyDragon
 
 from .imu_setup import *
+
+from cflib.crazyflie.log import LogConfig
 
 
 
@@ -12,11 +12,8 @@ period_in_ms = 10
 class IMU:
 
     def __init__( self, cf: CrazyDragon ):
-        self.cf = cf
 
-        adjust_orientation_sensitivity( cf )
-        activate_kalman_estimator( cf )
-        reset_estimator( cf )
+        self.cf = cf
 
 
     def start_get_vel( self, period_in_ms=period_in_ms ):
@@ -30,7 +27,7 @@ class IMU:
         log_conf.start()
  
 
-    def start_get_acc( self, period_in_ms=period_in_ms ):
+    def start_get_acc(self, period_in_ms=period_in_ms):
         log_conf = LogConfig( name='acceleration', period_in_ms=period_in_ms )
         log_conf.add_variable( 'acc.x', 'FP16' )      ## m/s^2
         log_conf.add_variable( 'acc.y', 'FP16' )      ## m/s^2

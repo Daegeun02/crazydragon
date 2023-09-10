@@ -1,60 +1,59 @@
-from threading import Thread
-
 from ..crazy import CrazyDragon
 
-from .integral_loop import _dot_thrust
-from .integral_loop import _thrust_clip
-
-from .optimus_prime import _command_as_RPY
-from .optimus_prime import _command_is_not_in_there
-
-from .constants import alpha
+from threading import Thread
 
 from .._packet import _Packet
 
+from .._base._controller_base.integral_loop import _dot_thrust
+from .._base._controller_base.integral_loop import _thrust_clip
+
+from .._base._controller_base.optimus_prime import _command_as_RPY
+from .._base._controller_base.optimus_prime import _command_is_not_in_there
+
+from .._base._controller_base.constants import alpha
+
 from numpy import zeros, array
+from numpy import ndarray
 
 from time import sleep
-
-_FLOAT = 4
 
 
 
 class Controller( Thread ):
 
-    def __init__( self, _cf: CrazyDragon, config ):
+    def __init__( self, cf: CrazyDragon, config ):
         
-        super().__init__( self, daemon=True )
+        super().__init__()
 
-        self.packet = None
-        self.header = config['header']
-        self.cf     = _cf
-        self.dt     = config['dt']
-        self.n      = config['Hz']
+        self.daemon = True
+
+        self.cf = cf
+        self.dt = config['dt']
+        self.n  = config['n']
 
         self.acc_cmd = zeros(3)
         self.command = zeros(4)
         self.thrust  = array( [alpha * 9.81], dtype=int )
 
-        self.ready_for_command = False
+        try:
+            port = config['port']
+            baud = config['baud']
 
-        self.AllGreen = True
+            self.packet = _Packet( port=port, baudrate=baud )
 
-        self._on_link( config['port'], config['baud'] )
+            self.connected = False
+
+        except:
+            print( "without serial communication" )
+
+            self.packet = None
 
     
-    def _on_link( self, port, baud ):
+    def connect( self, header: ndarray, bytes: int ):
 
-        self.packet = _Packet( port, baud, timeout=1 )
+        self.packet._enroll_receiver( bytes, header )
 
-        packet = self.packet
-
-        packet._enroll_receiver( 3, self.header )
-
-        thread = Thread( target=packet._recvfrom, args=(), daemon=True )
-
-        thread.start()
-
+        self.connected = True
 
 
     def init_send_setpoint( self ):
@@ -62,7 +61,7 @@ class Controller( Thread ):
         commander = self.cf.commander
         ## initialize
         commander.send_setpoint( 0, 0, 0, 0 )
-        self.ready_for_command = True
+        self.cf.ready_for_command = True
 
 
     def stop_send_setpoint( self ):
@@ -71,38 +70,45 @@ class Controller( Thread ):
         ## stop command
         self.cf.command[:] = zeros(3)
         ## stop signal
-        self.ready_for_command = False
+        self.cf.ready_for_command = False
 
         for _ in range( 50 ):
             commander.send_setpoint( 0, 0, 0, 10001 )
-            sleep( 0.05 )
+            sleep( 0.2 )
 
         commander.send_stop_setpoint()
 
 
     def run( self ):
 
-        packet = self.packet
-        rxData = packet.RxData
-
         cf        = self.cf
         commander = cf.commander
+
         n  = self.n
         dt = self.dt / n
+
+        att_cur = cf.att
+        acc_cur = cf.acc
 
         acc_cmd = self.acc_cmd
         command = self.command
         thrust  = self.thrust
 
-        att_cur = cf.att
-        acc_cur = cf.acc
-
-        while not self.ready_for_command:
+        while not cf.ready_for_command:
             sleep( 0.1 )
 
-        while self.ready_for_command:
+        packet = self.packet
 
-            acc_cmd[:] = rxData
+        if self.connected:
+            Thread( target=packet.start_receive, args=[cf.command], daemon=True )
+        else:
+            print( "warning: not connected with serial" )
+
+        print( 'controller starts working' )
+
+        while cf.ready_for_command:
+
+            acc_cmd[:] = cf.command
 
             _command_is_not_in_there( acc_cmd, att_cur )
 
@@ -126,3 +132,5 @@ class Controller( Thread ):
                 )
 
                 sleep( dt )
+
+        print( 'controller end' )

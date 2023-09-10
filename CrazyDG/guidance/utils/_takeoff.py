@@ -10,8 +10,8 @@ from time import sleep
 
 def takeoff( cf: CrazyDragon, h=1.5, T=3, dt=0.1 ):
 
-    cur     = zeros(6)
-    des     = zeros(6)
+    cur     = zeros(3)
+    des     = zeros(3)
     acc_cmd = zeros(3)
     P_pos   = zeros(3)
     D_pos   = zeros(3)

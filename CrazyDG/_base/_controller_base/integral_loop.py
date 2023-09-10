@@ -7,7 +7,7 @@ from .constants import *
 K_T = alpha * Kp
 
 
-def _dot_thrust(command, acc_cur):
+def _dot_thrust( command, acc_cur ):
     ## difference
     dot_acc = command[3] - norm( acc_cur )
     ## command
@@ -16,11 +16,11 @@ def _dot_thrust(command, acc_cur):
     return dot_thr
 
 
-def _thrust_clip(thrust_cmd):
+def _thrust_clip( thrust_cmd ):
     ## thrust clip thrust
-    if (thrust_cmd > 60000):
+    if ( thrust_cmd > 60000 ):
         thrust_cmd = 60000
-    elif (thrust_cmd < 10001):
+    elif ( thrust_cmd < 10001 ):
         thrust_cmd = 10001
 
-    return int(thrust_cmd)
+    return int( thrust_cmd )

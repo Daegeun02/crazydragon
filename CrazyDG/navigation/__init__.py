@@ -1,39 +1,53 @@
-from threading import Thread
-
 from ..crazy import CrazyDragon
 
-from .imu       import IMU
-from .qualisys  import Qualisys
+from threading import Thread
 
 from .._packet import _Packet
 
+from .._base._navigation_base.imu       import IMU
+from .._base._navigation_base.imu_setup import preflight_sequence
+from .._base._navigation_base.qualisys  import Qualisys
+
 from time import sleep
+
+from numpy import ndarray
 
 
 
 class Navigation( Thread ):
 
-    def __init__( self, _cf: CrazyDragon, config ):
+    def __init__( self, cf: CrazyDragon, config ):
 
         super().__init__()
 
         self.daemon = True
 
-        self.packet = None
-        self.header = config['header']
-        self.cf     = _cf
+        self.cf = cf
 
-        self.imu = IMU( config['scf'] )
+        self.imu = IMU( cf )
         self.qtm = Qualisys( config['body_name'] )
 
         self.navigate = True
 
-        self._on_link( config['port'], config['baud'] )
+        try:
+            port = config['port']
+            baud = config['baud']
+
+            self.packet = _Packet( port=port, baudrate=baud )
+
+            self.connected = False
+
+        except:
+            print( "without serial communication" )
+
+            self.packet = None
 
 
-    def _on_link( self, port, baud ):
+    def connect( self, header: ndarray, bytes: int ):
 
-        self.packet = _Packet( port, baud, timeout=1 )
+        self.packet._enroll( bytes, header )
+
+        self.connected = True
 
 
     @classmethod
@@ -44,39 +58,45 @@ class Navigation( Thread ):
 
         cf.extpos.send_extpos( data[0], data[1], data[2] )
 
-    
+
     def run( self ):
 
         cf = self.cf
 
-        pos = self.cf.pos
-        vel = self.cf.vel
-        acc = self.cf.acc
-        att = self.cf.att
+        imu = self.imu
+        qtm = self.qtm
 
-        self.imu.start_get_vel()
-        self.imu.start_get_acc()
+        preflight_sequence( cf )
 
-        self.qtm.on_pose = lambda data: __class__._on_pose( cf, data )
+        sleep( 1 )
 
-        if self.packet is not None:
+        imu.start_get_acc()
+        imu.start_get_vel()
 
-            packet = self.packet
+        qtm.on_pose = lambda pose: __class__._on_pose( cf, pose )
 
-            packet._enroll( 12, self.header )
+        packet = self.packet
+
+        pos = cf.pos
+        vel = cf.vel
+        att = cf.att
+
+        if not self.connected:
+            print( "warning: not connected with serial" ) 
 
         while self.navigate:
 
-            packet.TxData[0:3] = pos
-            packet.TxData[3:6] = vel
-            packet.TxData[6:9] = acc
-            packet.TxData[9: ] = att
+            if ( packet != None ):
 
-            packet._sendto()
+                packet.TxData[0:3] = pos
+                packet.TxData[3:6] = vel
+                packet.TxData[6:9] = att
+
+                self.packet._sendto()
 
             sleep( 0.01 )
 
-    
+
     def join( self ):
 
         self.navigate = False

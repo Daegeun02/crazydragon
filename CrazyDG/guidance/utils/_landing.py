@@ -13,9 +13,9 @@ from time import sleep
 
 def landing( cf: CrazyDragon, option=1, h=0.2, T=5, dt=0.1, step=0.075 ):
 
-    cur     = zeros(6)
-    des     = zeros(6)
-    des_cmd = zeros(6)
+    cur     = zeros(3)
+    des     = zeros(3)
+    des_cmd = zeros(3)
     acc_cmd = zeros(3)
     P_pos   = zeros(3)
     D_pos   = zeros(3)

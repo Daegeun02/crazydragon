@@ -31,6 +31,45 @@ class _Packet( Serial ):
         self.write( buffer )
 
     
+    def start_receive( self, buff, parser=None ):
+
+        RxData   = self.RxData
+        RxHeader = self.RxHeader
+        size     = self.RxBfsize         ## float
+
+        hdrf = 0
+
+        while True:
+
+            if ( self.readable() ):
+                
+                if ( hdrf == 2 ):
+
+                    data = self.read( size )
+
+                    RxData[:] = frombuffer( data, dtype=float32 )
+
+                    hdrf = 0
+
+                elif ( hdrf == 0 ):
+                    data = self.read()
+                    if ( data == RxHeader[0] ):
+                        hdrf = 1
+
+                elif ( hdrf == 1 ):
+                    data = self.read()
+                    if ( data == RxHeader[1] ):
+                        hdrf = 2
+
+                else:
+                    hdrf = 0
+                
+            if ( parser != None ):
+                parser( buff, RxData )
+
+                    
+
+    
     def _recvfrom( self ):
 
         RxData   = self.RxData

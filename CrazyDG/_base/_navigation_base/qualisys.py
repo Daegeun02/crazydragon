@@ -11,12 +11,16 @@ from math import isnan
 
 class Qualisys( Thread ):
 
-    def __init__( self, body_name ):
+    def __init__( self, _cfs: dict ):
 
         Thread.__init__( self )
 
-        self.body_name  = body_name
-        self.on_pose    = None
+        if ( type( _cfs ) != dict ):
+            self._cfs = { _cfs: None }
+        else:
+            self._cfs = _cfs
+
+        self.on_pose    = {}
         self.connection = None
         self.qtm_6DoF_labels = []
         self._stay_open = True
@@ -84,29 +88,31 @@ class Qualisys( Thread ):
 
         header, bodies  = packet.get_6d_euler()
 
-        if self.body_name not in self.qtm_6DoF_labels:
-            print( 'Body' + self.body_name + 'not found.' )
-        else:
-            index = self.qtm_6DoF_labels.index( self.body_name )
+        for bodyname, _ in self._cfs.items():
 
-            if bodies is None:
-                pass
-        
+            if bodyname not in self.qtm_6DoF_labels:
+                print( 'Body' + bodyname + 'not found.' )
             else:
-                data = bodies[index]
+                index = self.qtm_6DoF_labels.index( bodyname )
 
-                position = data[0]
-                x = position[0] / 1000
-                y = position[1] / 1000
-                z = position[2] / 1000
+                if bodies is None:
+                    pass
+            
+                else:
+                    data = bodies[index]
 
-                euler = data[1]
-                R = euler[2]
-                P = euler[1]
-                Y = euler[0]
+                    position = data[0]
+                    x = position[0] / 1000
+                    y = position[1] / 1000
+                    z = position[2] / 1000
 
-                if self.on_pose:
-                    if isnan( x ):
-                        return
+                    euler = data[1]
+                    R = euler[2]
+                    P = euler[1]
+                    Y = euler[0]
 
-                    self.on_pose( [x, y, z, R, P, Y] )
+                    if self.on_pose:
+                        if isnan( x ):
+                            return
+
+                        self.on_pose( [x, y, z, R, P, Y] )
