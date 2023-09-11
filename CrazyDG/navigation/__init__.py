@@ -25,7 +25,7 @@ class Navigation( Thread, CommunicationBase ):
         self.cf = cf
 
         self.imu = IMU( cf )
-        self.qtm = Qualisys( config['body_name'] )
+        # self.qtm = Qualisys( config['body_name'] )
 
         self.navigate = True
 
