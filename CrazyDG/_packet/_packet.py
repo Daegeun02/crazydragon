@@ -31,9 +31,9 @@ class _Packet( Serial ):
         self.write( buffer )
 
     
-    def start_receive( self, buff ):
+    def start_receive( self, parser, *args ):
 
-        RxData   = self.RxData
+        # RxData   = self.RxData
         RxHeader = self.RxHeader
         size     = self.RxBfsize         ## float
 
@@ -47,9 +47,9 @@ class _Packet( Serial ):
 
                     data = self.read( size )
 
-                    buff[:] = frombuffer( data, dtype=float32 )
-
                     hdrf = 0
+
+                    parser( data, args )
 
                 elif ( hdrf == 0 ):
                     data = self.read()
@@ -63,7 +63,6 @@ class _Packet( Serial ):
 
                 else:
                     hdrf = 0
-                    
 
     
     def _recvfrom( self ):

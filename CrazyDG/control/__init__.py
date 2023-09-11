@@ -41,14 +41,12 @@ class Controller( Thread ):
 
             self.packet = _Packet( port=port, baudrate=baud )
 
-            self.connected = True
-
-            self.parser = None
-
         except:
             print( "without serial communication" )
 
             self.packet = None
+
+        self.connected = False
 
     
     def connect( self, header: ndarray, bytes: int ):
@@ -56,6 +54,22 @@ class Controller( Thread ):
         self.packet._enroll_receiver( bytes, header )
 
         self.connected = True
+
+    
+    def isconnected( self ):
+
+        return self.connected
+
+    
+    def parser( self, RxData: bytes, *args ) -> None:
+
+        print( "\033[KParsing functin is not defined" )
+        print( "\033[KYou said that need serial communication" )
+        print( "\033[KYou don't make Parsing function and overload it" )
+
+        print( "\033[Kfunction should be like" )
+        print( "\033[KINPUT : bytes, *args" )
+        print( "\033[KOUTPUT: None" )
 
 
     def init_send_setpoint( self ):
@@ -98,10 +112,10 @@ class Controller( Thread ):
 
         packet = self.packet
 
+        args = [cf.command]
+
         if self.connected:
-            Thread( target=packet.start_receive, args=[cf.command,], daemon=True )
-        else:
-            print( "warning: not connected with serial" )
+            Thread( target=packet.start_receive, args=[self.parser, args], daemon=True )
 
 
         while not cf.ready_for_command:
