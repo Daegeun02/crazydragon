@@ -4,6 +4,8 @@ from threading import Thread
 
 from .._packet import _Packet
 
+from .._base import CommunicationBase
+
 from .._base._controller_base.integral_loop import _dot_thrust
 from .._base._controller_base.integral_loop import _thrust_clip
 
@@ -19,7 +21,7 @@ from time import sleep
 
 
 
-class Controller( Thread ):
+class Controller( Thread, CommunicationBase ):
 
     def __init__( self, cf: CrazyDragon, config ):
         
@@ -46,32 +48,28 @@ class Controller( Thread ):
 
             self.packet = None
 
-        self.connected = False
+        self.config = config
 
-    
-    def connect( self, header: ndarray, bytes: int ):
 
-        self.packet._enroll_receiver( bytes, header )
+    def RxConnect( self ):
+
+        config = self.config
+        packet = self.packet
+
+        try:
+            packet._RxConfigure( config['bfsize'], config['header'] )
+        except:
+            print( "\033[KRxConfigure need 'bfsize' and 'header'" )
+            raise KeyError
 
         self.connected = True
 
+
+    def Parser( self, data, *args ):
+
+        args[0][:] = data
+
     
-    def isconnected( self ):
-
-        return self.connected
-
-    
-    def parser( self, RxData: bytes, *args ) -> None:
-
-        print( "\033[KParsing functin is not defined" )
-        print( "\033[KYou said that need serial communication" )
-        print( "\033[KYou don't make Parsing function and overload it" )
-
-        print( "\033[Kfunction should be like" )
-        print( "\033[KINPUT : bytes, *args" )
-        print( "\033[KOUTPUT: None" )
-
-
     def init_send_setpoint( self ):
         ## commander
         commander = self.cf.commander
@@ -112,17 +110,12 @@ class Controller( Thread ):
 
         packet = self.packet
 
-        args = [cf.command]
+        Receiver = Thread( target=packet.start_receive, args=[self.Parser, cf.command], daemon=True )
+        Receiver.start()
 
-        if self.connected:
-            Thread( target=packet.start_receive, args=[self.parser, args], daemon=True )
-
-
+        ## wait until start flag on
         while not cf.ready_for_command:
             sleep( 0.1 )
-
-        print( 'controller starts working' )
-
 
         while cf.ready_for_command:
 
@@ -152,3 +145,5 @@ class Controller( Thread ):
                 sleep( dt )
 
         print( 'controller end' )
+
+        Receiver.join()

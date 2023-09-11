@@ -4,6 +4,8 @@ from threading import Thread
 
 from .._packet import _Packet
 
+from .._base import CommunicationBase
+
 from .._base._navigation_base.imu       import IMU
 from .._base._navigation_base.imu_setup import preflight_sequence
 from .._base._navigation_base.qualisys  import Qualisys
@@ -14,7 +16,7 @@ from numpy import ndarray
 
 
 
-class Navigation( Thread ):
+class Navigation( Thread, CommunicationBase ):
 
     def __init__( self, cf: CrazyDragon, config ):
 
@@ -40,32 +42,35 @@ class Navigation( Thread ):
 
             self.packet = None
 
-        self.connected = False
+        self.config = config
 
+    
+    def TxConnect( self ):
 
-    def connect( self, header: ndarray, bytes: int ):
+        config = self.config
+        packet = self.packet
 
-        self.packet._enroll( bytes, header )
+        try:
+            packet._TxConfigure( config['bfsize'], config['header'] )
+        except:
+            print( "\033[KTxConfigure need 'bfsize' and 'header'" )
+            raise KeyError
 
         self.connected = True
 
+
+    def Transmit( self ):
+
+        _cf    = self.cf
+        packet = self.packet
+
+        packet.TxData[0:3] = _cf.pos
+        packet.TxData[3:6] = _cf.vel
+        packet.TxData[6:9] = _cf.att
+
+        packet._Transmit()
+
     
-    def isconnected( self ):
-
-        return self.connected
-
-    
-    def transmit( self, _cf: CrazyDragon ) -> ndarray:
-
-        print( "\033[KTransmit function is not defined" )
-        print( "\033[KYou said that need serial communication" )
-        print( "\033[KYou don't make Transmit functon and overload it" )
-
-        print( "\033[Kfunction should be like" )
-        print( "\033[KINPUT : CrazyDragon" )
-        print( "\033[KOUTPUT: numpy ndarray with size that you said in Navigation.connect funciont" )
-
-
     @classmethod
     def _on_pose( cls, cf: CrazyDragon, data: list ):
         
@@ -82,6 +87,8 @@ class Navigation( Thread ):
         imu = self.imu
         qtm = self.qtm
 
+        config = self.config
+
         ## setup imu sensor
         preflight_sequence( cf )
 
@@ -91,26 +98,14 @@ class Navigation( Thread ):
         imu.start_get_acc()
         imu.start_get_vel()
 
-        ## get ready qtm it will automatically send data 
-        for bodyname, _ in qtm._cfs.items():
-            ## this is parser
-            qtm.on_pose[bodyname] = lambda pose: __class__._on_pose( cf, pose )
-
-        ## _Packet or None type
-        packet = self.packet
-
-        ##transmit function
-        if self.connected:
-            transmit = self.transmit
-            transmit( cf )
+        ## setup my qtm data
+        qtm.on_pose[config['bodyname']] = lambda pose: __class__._on_pose( cf, pose )
 
         while self.navigate:
 
             if self.connected:
 
-                packet.TxData[:] = transmit( cf )
-
-                packet._sendto()
+                self.Transmit()
 
             sleep( 0.01 )
 

@@ -11,29 +11,29 @@ _FLOAT=4
 
 class _Packet( Serial ):
 
-    def _enroll( self, size: int, header: ndarray ):
+    def _TxConfigure( self, size: int, header: ndarray ):
 
-        self.TxData = zeros( size, dtype=float32 )
-        self.header = ( header.astype( uint8 ) ).tobytes()
+        self.TxData   = zeros( size, dtype=float32 )
+        self.Txheader = ( header.astype( uint8 ) ).tobytes()
 
     
-    def _enroll_receiver( self, size: int, header: ndarray ):
+    def _RxConfigure( self, size: int, header: ndarray ):
 
         self.RxData   = zeros( size, dtype=float32 )
         self.RxHeader = ( header.astype( uint8 ) ).tobytes()
+
         self.RxBfsize = size * _FLOAT
 
+    
+    def _Transmit( self ):
 
-    def _sendto( self ):
-
-        buffer = self.header + self.TxData.tobytes()
+        buffer = self.Txheader + self.TxData.tobytes()
 
         self.write( buffer )
 
     
     def start_receive( self, parser, *args ):
 
-        # RxData   = self.RxData
         RxHeader = self.RxHeader
         size     = self.RxBfsize         ## float
 
@@ -50,40 +50,6 @@ class _Packet( Serial ):
                     hdrf = 0
 
                     parser( data, args )
-
-                elif ( hdrf == 0 ):
-                    data = self.read()
-                    if ( data == RxHeader[0] ):
-                        hdrf = 1
-
-                elif ( hdrf == 1 ):
-                    data = self.read()
-                    if ( data == RxHeader[1] ):
-                        hdrf = 2
-
-                else:
-                    hdrf = 0
-
-    
-    def _recvfrom( self ):
-
-        RxData   = self.RxData
-        RxHeader = self.RxHeader
-        size     = self.RxBfsize         ## float
-
-        hdrf = 0
-
-        while True:
-
-            if self.readable():
-
-                if ( hdrf == 2 ):
-
-                    data = self.read( size )
-
-                    RxData[:] = frombuffer( data, dtype=float32 )
-
-                    hdrf = 0
 
                 elif ( hdrf == 0 ):
                     data = self.read()
