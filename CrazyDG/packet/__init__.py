@@ -1,7 +1,6 @@
 from serial import Serial
 
 from numpy import zeros
-from numpy import frombuffer
 from numpy import float32, uint8
 from numpy import ndarray
 
@@ -9,7 +8,7 @@ _FLOAT=4
 
 
 
-class _Packet( Serial ):
+class Packet( Serial ):
 
     def _TxConfigure( self, size: int, header: ndarray ):
 

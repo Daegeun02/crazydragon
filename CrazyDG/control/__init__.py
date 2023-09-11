@@ -2,7 +2,7 @@ from ..crazy import CrazyDragon
 
 from threading import Thread
 
-from .._packet import _Packet
+from ..packet import Packet
 
 from .._base import CommunicationBase
 
@@ -15,7 +15,7 @@ from .._base._controller_base.optimus_prime import _command_is_not_in_there
 from .._base._controller_base.constants import alpha
 
 from numpy import zeros, array
-from numpy import ndarray
+from numpy import frombuffer, float32
 
 from time import sleep
 
@@ -37,24 +37,13 @@ class Controller( Thread, CommunicationBase ):
         self.command = zeros(4)
         self.thrust  = array( [alpha * 9.81], dtype=int )
 
-        try:
-            port = config['port']
-            baud = config['baud']
-
-            self.packet = _Packet( port=port, baudrate=baud )
-
-        except:
-            print( "without serial communication" )
-
-            self.packet = None
-
+        self.packet = None
         self.config = config
 
 
-    def RxConnect( self ):
+    def RxConnect( self, packet: Packet ):
 
         config = self.config
-        packet = self.packet
 
         try:
             packet._RxConfigure( config['bfsize'], config['header'] )
@@ -62,12 +51,13 @@ class Controller( Thread, CommunicationBase ):
             print( "\033[KRxConfigure need 'bfsize' and 'header'" )
             raise KeyError
 
+        self.packet    = packet
         self.connected = True
 
 
     def Parser( self, data, *args ):
 
-        args[0][:] = data
+        args[0][:] = frombuffer( data, dtype=float32 )
 
     
     def init_send_setpoint( self ):
