@@ -1,5 +1,7 @@
 ## empty
 
+from ..packet import Packet
+
 
 from ._navigation_base import *
 
@@ -14,11 +16,11 @@ class CommunicationBase:
         self.connected = False
 
 
-    def TxConnect( self ):
+    def TxConnect( self, packet: Packet ):
         raise NotImplementedError
 
     
-    def RxConnect( self ):
+    def RxConnect( self, packet: Packet ):
         raise NotImplementedError
 
 

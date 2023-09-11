@@ -2,7 +2,7 @@ from threading import Thread
 
 from ..crazy import CrazyDragon
 
-from .._packet import _Packet
+from ..packet import Packet
 
 from time import sleep
 
@@ -28,7 +28,7 @@ class Navigation_TEST( Thread ):
 
     def _on_link( self, port, baud ):
 
-        self.packet = _Packet( port, baud, timeout=0.02 )
+        self.packet = Packet( port, baud, timeout=0.02 )
 
     def run( self ):
 

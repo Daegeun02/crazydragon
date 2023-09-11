@@ -2,7 +2,7 @@ from threading import Thread
 
 from ..crazy import CrazyDragon
 
-from .._packet import _Packet
+from ..packet import Packet
 
 from time import sleep
 
@@ -30,7 +30,7 @@ class CommunicationCenter( Thread ):
     
     def _on_link( self, port, baud ):
 
-        self.packet = _Packet( port, baud, timeout=1 )
+        self.packet = Packet( port, baud, timeout=1 )
 
         packet = self.packet
         packet._enroll_receiver( 12, self.Rxheader )

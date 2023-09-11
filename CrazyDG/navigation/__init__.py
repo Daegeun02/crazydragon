@@ -2,7 +2,7 @@ from ..crazy import CrazyDragon
 
 from threading import Thread
 
-from .._packet import _Packet
+from ..packet import Packet
 
 from .._base import CommunicationBase
 
@@ -11,8 +11,6 @@ from .._base._navigation_base.imu_setup import preflight_sequence
 from .._base._navigation_base.qualisys  import Qualisys
 
 from time import sleep
-
-from numpy import ndarray
 
 
 
@@ -31,24 +29,13 @@ class Navigation( Thread, CommunicationBase ):
 
         self.navigate = True
 
-        try:
-            port = config['port']
-            baud = config['baud']
-
-            self.packet = _Packet( port=port, baudrate=baud )
-
-        except:
-            print( "without serial communication" )
-
-            self.packet = None
-
+        self.packet = None
         self.config = config
 
     
-    def TxConnect( self ):
+    def TxConnect( self, packet: Packet ):
 
         config = self.config
-        packet = self.packet
 
         try:
             packet._TxConfigure( config['bfsize'], config['header'] )
@@ -56,19 +43,24 @@ class Navigation( Thread, CommunicationBase ):
             print( "\033[KTxConfigure need 'bfsize' and 'header'" )
             raise KeyError
 
+        self.packet    = packet
         self.connected = True
 
 
     def Transmit( self ):
 
-        _cf    = self.cf
-        packet = self.packet
+        if ( self.packet != None ):
+            _cf    = self.cf
+            packet = self.packet
 
-        packet.TxData[0:3] = _cf.pos
-        packet.TxData[3:6] = _cf.vel
-        packet.TxData[6:9] = _cf.att
+            packet.TxData[0:3] = _cf.pos
+            packet.TxData[3:6] = _cf.vel
+            packet.TxData[6:9] = _cf.att
 
-        packet._Transmit()
+            packet._Transmit()
+
+        else:
+            print( "something is weird" )
 
     
     @classmethod
