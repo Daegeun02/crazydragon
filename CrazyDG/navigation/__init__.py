@@ -35,14 +35,12 @@ class Navigation( Thread ):
 
             self.packet = _Packet( port=port, baudrate=baud )
 
-            self.connected = False
-
         except:
             print( "without serial communication" )
 
-            self.connected = True
-
             self.packet = None
+
+        self.connected = False
 
 
     def connect( self, header: ndarray, bytes: int ):
@@ -50,6 +48,11 @@ class Navigation( Thread ):
         self.packet._enroll( bytes, header )
 
         self.connected = True
+
+    
+    def isconnected( self ):
+
+        return self.connected
 
     
     def transmit( self, _cf: CrazyDragon ) -> ndarray:
@@ -79,29 +82,35 @@ class Navigation( Thread ):
         imu = self.imu
         qtm = self.qtm
 
+        ## setup imu sensor
         preflight_sequence( cf )
 
         sleep( 1 )
 
+        ## start imu sensor
         imu.start_get_acc()
         imu.start_get_vel()
 
-        qtm.on_pose = lambda pose: __class__._on_pose( cf, pose )
+        ## get ready qtm it will automatically send data 
+        for bodyname, _ in qtm._cfs.items():
+            ## this is parser
+            qtm.on_pose[bodyname] = lambda pose: __class__._on_pose( cf, pose )
 
+        ## _Packet or None type
         packet = self.packet
 
-        transmit = self.transmit
-
-        if not self.connected:
-            print( "warning: not connected with serial" ) 
+        ##transmit function
+        if self.connected:
+            transmit = self.transmit
+            transmit( cf )
 
         while self.navigate:
 
-            if ( packet != None ):
+            if self.connected:
 
                 packet.TxData[:] = transmit( cf )
 
-                self.packet._sendto()
+                packet._sendto()
 
             sleep( 0.01 )
 

@@ -16,11 +16,15 @@ class Qualisys( Thread ):
         Thread.__init__( self )
 
         if ( type( _cfs ) != dict ):
-            self._cfs = { _cfs: None }
+            self._cfs    = { _cfs: None }
+            self.on_pose = { _cfs: None }
         else:
-            self._cfs = _cfs
+            self._cfs    = _cfs
+            self.on_pose = {}
 
-        self.on_pose    = {}
+            for bodyname, _ in self._cfs.items():
+                self.on_pose[bodyname] = None
+
         self.connection = None
         self.qtm_6DoF_labels = []
         self._stay_open = True
@@ -111,8 +115,8 @@ class Qualisys( Thread ):
                     P = euler[1]
                     Y = euler[0]
 
-                    if self.on_pose:
+                    if self.on_pose[bodyname]:
                         if isnan( x ):
                             return
 
-                        self.on_pose( [x, y, z, R, P, Y] )
+                        self.on_pose[bodyname]( [x, y, z, R, P, Y] )
