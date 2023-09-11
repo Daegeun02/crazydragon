@@ -46,9 +46,9 @@ class Controller( Thread, CommunicationBase ):
         config = self.config
 
         try:
-            packet._RxConfigure( config['bfsize'], config['header'] )
+            packet._RxConfigure( config['Rxbfsize'], config['Rxheader'] )
         except:
-            print( "\033[KRxConfigure need 'bfsize' and 'header'" )
+            print( "\033[KRxConfigure need 'Rxbfsize' and 'Rxheader'" )
             raise KeyError
 
         self.packet    = packet

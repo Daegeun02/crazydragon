@@ -38,9 +38,9 @@ class Navigation( Thread, CommunicationBase ):
         config = self.config
 
         try:
-            packet._TxConfigure( config['bfsize'], config['header'] )
+            packet._TxConfigure( config['Txbfsize'], config['Txheader'] )
         except:
-            print( "\033[KTxConfigure need 'bfsize' and 'header'" )
+            print( "\033[KTxConfigure need 'Txbfsize' and 'Txheader'" )
             raise KeyError
 
         self.packet    = packet
