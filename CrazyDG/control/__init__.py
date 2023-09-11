@@ -59,6 +59,8 @@ class Controller( Thread, CommunicationBase ):
 
         args[0][:] = frombuffer( data, dtype=float32 )
 
+        print( args[0] )
+
     
     def init_send_setpoint( self ):
         ## commander

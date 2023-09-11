@@ -3,6 +3,7 @@ from serial import Serial
 from numpy import zeros
 from numpy import float32, uint8
 from numpy import ndarray
+from numpy import frombuffer
 
 _FLOAT=4
 
@@ -41,6 +42,7 @@ class Packet( Serial ):
         while True:
 
             if ( self.readable() ):
+                print( 'reading' )
                 
                 if ( hdrf == 2 ):
 
@@ -51,12 +53,12 @@ class Packet( Serial ):
                     parser( data, args )
 
                 elif ( hdrf == 0 ):
-                    data = self.read()
+                    data = frombuffer( self.read(), dtype=uint8 )
                     if ( data == RxHeader[0] ):
                         hdrf = 1
 
                 elif ( hdrf == 1 ):
-                    data = self.read()
+                    data = frombuffer( self.read(), dtype=uint8 )
                     if ( data == RxHeader[1] ):
                         hdrf = 2
 
