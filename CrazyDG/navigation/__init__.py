@@ -61,7 +61,7 @@ class Navigation( Thread ):
         print( "\033[KYou said that need serial communication" )
         print( "\033[KYou don't make Transmit functon and overload it" )
 
-        print( "\033[Kfuncion should be like" )
+        print( "\033[Kfunction should be like" )
         print( "\033[KINPUT : CrazyDragon" )
         print( "\033[KOUTPUT: numpy ndarray with size that you said in Navigation.connect funciont" )
 
