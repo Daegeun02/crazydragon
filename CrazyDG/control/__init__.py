@@ -66,7 +66,7 @@ class Controller( Thread, CommunicationBase ):
 
         if ( abs( _check ) < 1e-2 ):
 
-            args[0][:] = frombuffer( data, dtype=float32 )[0:3]
+            args[0][:] = Data[0:3]
         
         else:
             print( "checksum error" )
