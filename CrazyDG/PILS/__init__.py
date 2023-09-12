@@ -94,8 +94,9 @@ class Dynamic4PILS( Thread ):
 
             x[:] = dxdt @ x + grav
 
-            if ( x[2] < 0 ):
+            if ( ( x[2] < 0 ) and ( x[5] < 0 ) ):
                 x[2] = 0
+                x[5] = 0
 
             print( pos, vel )
 
