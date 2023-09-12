@@ -54,8 +54,8 @@ class Navigation( Thread, CommunicationBase ):
             packet = self.packet
 
             packet.TxData[0:3] = _cf.pos
-            # packet.TxData[3:6] = _cf.vel
-            # packet.TxData[6:9] = _cf.att
+            packet.TxData[3:6] = _cf.vel
+            packet.TxData[6:9] = _cf.att
 
             packet._Transmit()
 
