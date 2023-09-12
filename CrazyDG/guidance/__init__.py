@@ -76,9 +76,18 @@ class Guidance( Thread, CommunicationBase ):
 
         Data = frombuffer( data, dtype=float32 )
 
-        args[0][:] = Data[0:3]
-        args[1][:] = Data[3:6]
-        args[2][:] = Data[6:9]
+        _check = Data[9]
+
+        for byte in Data[0:9]:
+            _check -= byte
+
+        if ( abs( _check ) < 1e-2 ):
+
+            args[0][:] = Data[0:3]
+            args[1][:] = Data[3:6]
+            args[2][:] = Data[6:9]
+        else:
+            print( "checksum error" )
 
 
     def run( self ):

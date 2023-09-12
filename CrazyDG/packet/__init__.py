@@ -28,15 +28,22 @@ class Packet( Serial ):
     
     def _Transmit( self ):
 
-        buffer = self.Txheader + self.TxData.tobytes()
+        TxData = self.TxData
 
+        _check = zeros(1, dtype=float32)
+
+        for byte in TxData:
+            _check[0] += byte
+
+        buffer = self.Txheader + TxData.tobytes() + _check.tobytes()
+        
         self.write( buffer )
 
     
     def start_receive( self, parser, *args ):
 
         RxHeader = self.RxHeader
-        size     = self.RxBfsize         ## float
+        size     = self.RxBfsize + _FLOAT
 
         hdrf = 0
 
@@ -47,8 +54,6 @@ class Packet( Serial ):
                 if ( hdrf == 2 ):
 
                     data = self.read( size )
-
-                    print( frombuffer( data, dtype=float32 ) )
 
                     hdrf = 0
 

@@ -22,11 +22,11 @@ class Dynamic4PILS( Thread ):
         self.daemon = True
 
         self._cf = cf
-        self._dt = dt
+        self._dt = dt / 5
 
         self.dxdt = zeros((9,9))
 
-        self._build_dynamic( dt )
+        self._build_dynamic( self._dt )
 
         self.propagate = True
 
