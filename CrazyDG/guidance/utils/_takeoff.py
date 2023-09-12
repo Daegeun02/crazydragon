@@ -46,8 +46,6 @@ def takeoff( cf: CrazyDragon, h=1.5, T=3, dt=0.1 ):
 
         command[:] = acc_cmd
 
-        print( cf.pos, cf.command )
-
         t += dt
 
         sleep( dt )
