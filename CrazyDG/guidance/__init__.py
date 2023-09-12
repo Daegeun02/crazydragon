@@ -68,6 +68,8 @@ class Guidance( Thread, CommunicationBase ):
 
             packet._Transmit()
 
+            print( "Transmit" )
+
         else:
             print( "something is weird" )
 
