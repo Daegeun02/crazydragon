@@ -92,8 +92,7 @@ class Dynamic4PILS( Thread ):
             x[3:6] = vel
             x[6:9] = cmd
 
-            x[:] = dxdt @ x
-            x[:] -= grav
+            x[:] = dxdt @ x - grav
 
             print( pos, vel )
 
