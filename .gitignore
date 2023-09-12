@@ -3,3 +3,4 @@ dist
 build
 CrazyDG.egg-info
 test.py
+load.py
