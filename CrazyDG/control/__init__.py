@@ -55,11 +55,9 @@ class Controller( Thread, CommunicationBase ):
         self.connected = True
 
 
-    def Parser( self, data, *args ):
+    def Parser( self, data, args ):
 
         args[0][:] = frombuffer( data, dtype=float32 )
-
-        print( args[0] )
 
     
     def init_send_setpoint( self ):

@@ -42,7 +42,6 @@ class Packet( Serial ):
         while True:
 
             if ( self.readable() ):
-                print( 'reading' )
                 
                 if ( hdrf == 2 ):
 
