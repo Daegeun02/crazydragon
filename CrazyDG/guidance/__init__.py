@@ -8,6 +8,7 @@ from .._base import CommunicationBase
 
 from .utils import *
 
+from numpy import zeros
 from numpy import frombuffer, float32
 
 from time import sleep
@@ -40,7 +41,7 @@ class Guidance( Thread, CommunicationBase ):
             print( "\033[KTxConfigure need 'Txbfsize' and 'Txheader'" )
             raise KeyError
 
-        self.TxPacket    = packet
+        self.Packet    = packet
         self.connected = True
 
 
@@ -54,15 +55,15 @@ class Guidance( Thread, CommunicationBase ):
             print( "\033[KRxConfigure need 'Rxbfsize' and 'Rxheader'" )
             raise KeyError
 
-        self.RxPacket    = packet
+        self.Packet    = packet
         self.connected = True
 
     
     def Transmit( self ):
 
-        if ( self.TxPacket != None ):
+        if ( self.Packet != None ):
             _cf    = self.cf
-            packet = self.TxPacket
+            packet = self.Packet
 
             packet.TxData[:] = _cf.command
 
@@ -81,8 +82,6 @@ class Guidance( Thread, CommunicationBase ):
         for byte in Data[0:9]:
             _check -= byte
 
-        print( "checksum", _check )
-
         if ( abs( _check ) < 1e-2 ):
 
             args[0][:] = Data[0:3]
@@ -91,20 +90,18 @@ class Guidance( Thread, CommunicationBase ):
         else:
             print( "checksum error" )
 
+        self.Transmit()
+
 
     def run( self ):
 
         cf = self.cf
-        packet = self.RxPacket
+        packet = self.Packet
 
         Receiver = Thread( target=packet.start_receive, args=[self.Parser, cf.pos, cf.vel, cf.att] )
         Receiver.start()
 
         while self.guidance:
-
-            if self.connected:
-
-                self.Transmit()
 
             sleep( 0.01 )
 

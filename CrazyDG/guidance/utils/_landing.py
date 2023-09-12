@@ -62,6 +62,8 @@ def landing( cf: CrazyDragon, option=1, h=0.2, T=5, dt=0.1, step=0.075 ):
 
         command[:] = acc_cmd
 
+        print( command, t )
+
         t += dt
 
         sleep( dt )
