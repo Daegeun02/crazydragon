@@ -98,7 +98,7 @@ class Dynamic4PILS( Thread ):
                 x[2] = 0
                 x[5] = 0
 
-            print( pos, vel, cmd )
+            # print( pos, vel, cmd )
 
             pos[:] = x[0:3]
             vel[:] = x[3:6]            

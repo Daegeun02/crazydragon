@@ -57,7 +57,19 @@ class Controller( Thread, CommunicationBase ):
 
     def Parser( self, data, args ):
 
-        args[0][:] = frombuffer( data, dtype=float32 )
+        Data = frombuffer( data, dtype=float32 )
+
+        _check = Data[3]
+
+        for byte in Data[0:3]:
+            _check -= byte
+
+        if ( abs( _check ) < 1e-2 ):
+
+            args[0][:] = frombuffer( data, dtype=float32 )[0:3]
+        
+        else:
+            print( "checksum error" )
 
     
     def init_send_setpoint( self ):
