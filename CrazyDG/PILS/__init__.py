@@ -2,15 +2,41 @@ from ..crazy import CrazyDragon
 
 from threading import Thread
 
-from .integrator import _RK4
-from .integrator import _A_RK4
+import asyncio
+from asyncio import create_task
 
 from numpy import zeros
 from numpy import ndarray
 
 
-from time import sleep
 
+async def _Timer( dt ):
+    await asyncio.sleep( dt )
+
+
+async def _propagate( dxdt, x, pos, vel, cmd, gra ):
+
+    x[0:3] = pos
+    x[3:6] = vel
+    x[6:9] = cmd
+
+    x[:] = dxdt @ x + gra
+
+    if ( ( x[2] < 0 ) and ( x[5] < 0 ) ):
+        x[2] = 0
+        x[5] = 0
+
+    pos[:] = x[0:3]
+    vel[:] = x[3:6]
+
+
+async def Propagation( dxdt, x, pos, vel, cmd, gra, dt ):
+
+    timer = create_task( _Timer( dt ) )
+    _task = create_task( _propagate( dxdt, x, pos, vel, cmd, gra ) )
+
+    await timer
+    await _task
 
 
 class Dynamic4PILS( Thread ):
@@ -80,29 +106,21 @@ class Dynamic4PILS( Thread ):
         x    = zeros(9)
         dxdt = self.dxdt
 
-        grav = zeros(9)
-        grav[2] -= 0.5 * 9.81 * dt * dt
-        grav[5] -= 9.81 * dt
+        gra = zeros(9)
+        gra[2] -= 0.5 * 9.81 * dt * dt
+        gra[5] -= 9.81 * dt
 
         t = 0
 
         while self.propagate:
 
-            x[0:3] = pos
-            x[3:6] = vel
-            x[6:9] = cmd
-
-            x[:] = dxdt @ x + grav
-
-            if ( ( x[2] < 0 ) and ( x[5] < 0 ) ):
-                x[2] = 0
-                x[5] = 0
-
-            # print( pos, vel, cmd )
-
-            pos[:] = x[0:3]
-            vel[:] = x[3:6]            
+            asyncio.run( Propagation( dxdt, x, pos, vel, cmd, gra, dt ) )
 
             t += dt
 
-            sleep( dt )
+    
+    def join( self ):
+
+        self.propagate = False
+
+        super().join()
