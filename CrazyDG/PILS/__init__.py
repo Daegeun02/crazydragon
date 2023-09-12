@@ -19,10 +19,12 @@ class Dynamic4PILS( Thread ):
 
         super().__init__()
 
+        daemon = True
+
         self._cf = cf
         self._dt = dt
 
-        self.dxdt = zeros((6,9))
+        self.dxdt = zeros((9,9))
 
         self._build_dynamic( dt )
 
@@ -73,18 +75,27 @@ class Dynamic4PILS( Thread ):
 
         pos = cf.pos
         vel = cf.vel
+        cmd = cf.command
 
-        x    = zeros(6)
-        xdot = zeros(6)
-        dxdt = self.deriv_x( cf, xdot )
+        x    = zeros(9)
+        dxdt = self.dxdt
+
+        grav = zeros(9)
+        grav[2] -= 0.5 * 9.81 * dt * dt
+        grav[5] -= 9.81 * dt
 
         t = 0
 
-        x[0:3] = pos
-        x[3:6] = vel
-
         while self.propagate:
-            _RK4( dxdt, t, x, dt )
+
+            x[0:3] = pos
+            x[3:6] = vel
+            x[6:9] = cmd
+
+            x[:] = dxdt @ x
+            x[:] -= grav
+
+            print( pos, vel )
 
             pos[:] = x[0:3]
             vel[:] = x[3:6]            

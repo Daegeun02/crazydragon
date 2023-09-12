@@ -23,6 +23,7 @@ class Packet( Serial ):
         self.RxHeader = ( header.astype( uint8 ) ).tobytes()
 
         self.RxBfsize = size * _FLOAT
+        self.receiving = True
 
     
     def _Transmit( self ):
@@ -39,7 +40,7 @@ class Packet( Serial ):
 
         hdrf = 0
 
-        while True:
+        while self.receiving:
 
             if ( self.readable() ):
                 
@@ -63,3 +64,8 @@ class Packet( Serial ):
 
                 else:
                     hdrf = 0
+
+
+    def join( self ):
+
+        self.receiving = False

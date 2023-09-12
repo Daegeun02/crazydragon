@@ -136,4 +136,4 @@ class Controller( Thread, CommunicationBase ):
 
         print( 'controller end' )
 
-        Receiver.join()
+        packet.join()

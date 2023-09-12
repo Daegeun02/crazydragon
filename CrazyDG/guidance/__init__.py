@@ -24,6 +24,8 @@ class Guidance( Thread, CommunicationBase ):
 
         self.cf = cf
 
+        self.guidance = True
+
         self.packet = None
         self.config = config
 
@@ -70,10 +72,29 @@ class Guidance( Thread, CommunicationBase ):
             print( "something is weird" )
 
 
-    def Parser( self, data, *args ):
+    def Parser( self, data, args ):
 
         Data = frombuffer( data, dtype=float32 )
 
         args[0][:] = Data[0:3]
         args[1][:] = Data[3:6]
         args[2][:] = Data[6:9]
+
+
+    def run( self ):
+
+        cf = self.cf
+        packet = self.packet
+
+        Receiver = Thread( target=packet.start_receive, args=[self.Parser, cf.pos, cf.vel, cf.att] )
+        Receiver.start()
+
+        while self.guidance:
+
+            if self.connected:
+
+                self.Transmit()
+
+            sleep( 0.01 )
+
+        packet.join()
