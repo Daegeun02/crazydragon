@@ -81,6 +81,8 @@ class Guidance( Thread, CommunicationBase ):
         for byte in Data[0:9]:
             _check -= byte
 
+        print( "checksum", _check )
+
         if ( abs( _check ) < 1e-2 ):
 
             args[0][:] = Data[0:3]
