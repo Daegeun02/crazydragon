@@ -48,6 +48,8 @@ class Packet( Serial ):
 
                     data = self.read( size )
 
+                    print( frombuffer( data, dtype=float32 ) )
+
                     hdrf = 0
 
                     parser( data, args )
