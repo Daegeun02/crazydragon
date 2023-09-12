@@ -19,7 +19,7 @@ class Dynamic4PILS( Thread ):
 
         super().__init__()
 
-        daemon = True
+        self.daemon = True
 
         self._cf = cf
         self._dt = dt
@@ -92,7 +92,10 @@ class Dynamic4PILS( Thread ):
             x[3:6] = vel
             x[6:9] = cmd
 
-            x[:] = dxdt @ x - grav
+            x[:] = dxdt @ x + grav
+
+            if ( x[2] < 0 ):
+                x[2] = 0
 
             print( pos, vel )
 

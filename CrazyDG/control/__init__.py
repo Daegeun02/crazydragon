@@ -117,7 +117,7 @@ class Controller( Thread, CommunicationBase ):
 
             if ( acc_cmd[2] == 0 ):
                 sleep( dt )
-                return
+                # return
 
             for _ in range( n ):
 
