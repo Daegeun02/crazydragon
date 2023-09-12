@@ -40,7 +40,7 @@ class Guidance( Thread, CommunicationBase ):
             print( "\033[KTxConfigure need 'Txbfsize' and 'Txheader'" )
             raise KeyError
 
-        self.packet    = packet
+        self.TxPacket    = packet
         self.connected = True
 
 
@@ -54,15 +54,15 @@ class Guidance( Thread, CommunicationBase ):
             print( "\033[KRxConfigure need 'Rxbfsize' and 'Rxheader'" )
             raise KeyError
 
-        self.packet    = packet
+        self.RxPacket    = packet
         self.connected = True
 
     
     def Transmit( self ):
 
-        if ( self.packet != None ):
+        if ( self.TxPacket != None ):
             _cf    = self.cf
-            packet = self.packet
+            packet = self.TxPacket
 
             packet.TxData[:] = _cf.command
 
@@ -95,7 +95,7 @@ class Guidance( Thread, CommunicationBase ):
     def run( self ):
 
         cf = self.cf
-        packet = self.packet
+        packet = self.RxPacket
 
         Receiver = Thread( target=packet.start_receive, args=[self.Parser, cf.pos, cf.vel, cf.att] )
         Receiver.start()
