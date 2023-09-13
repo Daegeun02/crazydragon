@@ -1,49 +1,25 @@
 from ...crazy import CrazyDragon
 
-from .constants import Kp, Kd, g
+from ..._base._utils_base import asyncio
+from ..._base._utils_base import _Loop_Handler
 
-from numpy import array, zeros
-
-from time import sleep
+from numpy import zeros
 
 
 
 def goto( cf: CrazyDragon, destination, T, dt=0.1 ):
 
-    cur     = zeros(3)
-    des     = zeros(3)
-    acc_cmd = zeros(3)
-    P_pos   = zeros(3)
-    D_pos   = zeros(3)
-    care_g  = array([0,0,g])
+    des = zeros(6)
 
-    print( 'goto =>', destination )
+    print( f"goto >>> {destination}" )
 
     n = int( T / dt )
-    t = 0
 
-    command = cf.command
+    cmd = cf.command
+    pos = cf.pos
+    vel = cf.vel
 
-    cur[:] = cf.pos
-    pos    = cf.pos
-    vel    = cf.vel
-
-    des[:] = destination
-
-    cf.destination[:] = des
+    des[0:3] = destination
 
     for _ in range( n ):
-
-        P_pos[:] = des - pos
-        D_pos[:] = vel
-
-        acc_cmd[:] = 0
-        acc_cmd[:] += P_pos * Kp
-        acc_cmd[:] -= D_pos * Kd
-        acc_cmd[:] += care_g
-
-        command[:] = acc_cmd
-
-        t += dt
-
-        sleep( dt )
+        asyncio.run( _Loop_Handler( cmd, des[0:3], pos, des[3:6], vel, dt ) )

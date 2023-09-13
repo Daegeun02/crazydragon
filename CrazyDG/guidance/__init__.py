@@ -6,7 +6,7 @@ from ..packet import Packet
 
 from .._base import CommunicationBase
 
-from .utils import *
+from . import utils
 
 from numpy import zeros
 from numpy import frombuffer, float32

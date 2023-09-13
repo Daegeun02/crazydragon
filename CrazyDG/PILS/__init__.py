@@ -79,21 +79,6 @@ class Dynamic4PILS( Thread ):
         dxdt[5,8] = dt
 
     
-    def deriv_x( cf: CrazyDragon, out: ndarray ):
-
-        if( out.size != 6 ):
-            raise ValueError( 'wrong size' )
-
-        def _dxdt( t, x, args ):
-
-            out[0:3] = x[3:6]
-            out[3:6] = cf.command
-
-            return out
-
-        return _dxdt
-
-
     def run( self ):
 
         cf   = self._cf

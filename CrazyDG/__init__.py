@@ -11,5 +11,3 @@ from .guidance import utils
 from .navigation import Navigation
 
 from .recorder import Recorder
-
-from .communication_test import *

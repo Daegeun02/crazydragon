@@ -1,53 +1,27 @@
 from ...crazy import CrazyDragon
 
-from .constants import Kp, Kd, g
+from ..._base._utils_base import asyncio
+from ..._base._utils_base import _Loop_Handler
 
-from numpy import array, zeros
-
-from time import sleep
+from numpy import zeros
 
 
 
 def takeoff( cf: CrazyDragon, h=1.5, T=3, dt=0.1 ):
 
-    cur     = zeros(3)
-    des     = zeros(3)
-    acc_cmd = zeros(3)
-    P_pos   = zeros(3)
-    D_pos   = zeros(3)
-    care_g  = array([0,0,g])
+    des = zeros(6)
 
-    print( 'take-off' )
+    print( "<<< takeoff >>>")
 
     n = int( T / dt )
-    t = 0
 
-    command = cf.command
+    cmd = cf.command
+    pos = cf.pos
+    vel = cf.vel
 
-    cur[:] = cf.pos
-    pos    = cf.pos
-    vel    = cf.vel
-
-    des[ 0 ] = cur[0]
-    des[ 1 ] = cur[1]
-    des[ 2 ] = h
-
-    cf.destination[:] = des
+    des[0] = pos[0]
+    des[1] = pos[1]
+    des[2] = h
 
     for _ in range( n ):
-
-        P_pos[:] = des - pos
-        D_pos[:] = vel
-
-        acc_cmd[:] = 0
-        acc_cmd[:] += P_pos * Kp
-        acc_cmd[:] -= D_pos * Kd
-        acc_cmd[:] += care_g
-
-        command[:] = acc_cmd
-
-        t += dt
-
-        sleep( dt )
-
-    print( 'end' )
+        asyncio.run( _Loop_Handler( cmd, des[0:3], pos, des[3:6], vel, dt ) )
