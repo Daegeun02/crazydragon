@@ -5,14 +5,16 @@ from CrazyDG import CrazyDragon
 
 from threading import Thread
 
-from time import sleep
+from time import sleep, time
 
 
 async def print_state( _cf: CrazyDragon, t ):
     print( "\033[A\033[K", _cf.pos, _cf.vel, _cf.command, t )
 
+
 async def _Timer( dt ):
     await asyncio.sleep( dt )
+
 
 async def Print( _cf, t, dt ):
 
@@ -25,7 +27,7 @@ async def Print( _cf, t, dt ):
 
 def interface( _cf: CrazyDragon, thread: Thread, t ):
 
-    dt = 0.01
+    dt = 0.01-0.002
 
     while thread.is_alive():
 

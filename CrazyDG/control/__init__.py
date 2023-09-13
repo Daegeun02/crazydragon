@@ -121,7 +121,8 @@ class Controller( Thread, CommunicationBase ):
 
         while cf.ready_for_command:
 
-            acc_cmd[:] = cf.command
+            # acc_cmd[:] = cf.command
+            acc_cmd[2] = 10
 
             _command_is_not_in_there( acc_cmd, att_cur )
 
