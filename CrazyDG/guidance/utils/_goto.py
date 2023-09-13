@@ -11,7 +11,7 @@ def goto( cf: CrazyDragon, destination, T, dt=0.1 ):
 
     des = zeros(6)
 
-    print( f"goto >>> {destination}" )
+    print( f"goto >>> {destination}\n" )
 
     n = int( T / dt )
 

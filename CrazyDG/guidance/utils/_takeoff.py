@@ -11,7 +11,7 @@ def takeoff( cf: CrazyDragon, h=1.5, T=3, dt=0.1 ):
 
     des = zeros(6)
 
-    print( "<<< takeoff >>>")
+    print( "<<< takeoff >>>\n")
 
     n = int( T / dt )
 

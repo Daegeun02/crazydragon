@@ -11,7 +11,7 @@ def hover( cf: CrazyDragon, T, dt=0.1 ):
 
     des = zeros(6)
 
-    print( "<<< hover >>>" )
+    print( "<<< hover >>>\n" )
 
     n = int( T / dt )
 
