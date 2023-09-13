@@ -1,3 +1,6 @@
+import asyncio
+from asyncio import create_task
+
 from serial import Serial
 
 from numpy import zeros
@@ -40,6 +43,15 @@ class Packet( Serial ):
         self.write( buffer )
 
     
+    async def Transmit( self, dt ):
+
+        timer = create_task( _Timer( dt ) )
+        _task = create_task( _Transmit( self ) )
+
+        await timer
+        await _task
+
+    
     def start_receive( self, parser, *args ):
 
         RxHeader = self.RxHeader
@@ -76,3 +88,22 @@ class Packet( Serial ):
     def join( self ):
 
         self.receiving = False
+
+
+async def _Timer( dt ):
+    await asyncio.sleep( dt )
+
+
+async def _Transmit( packet: Packet ):
+
+    TxData = packet.TxData
+
+    _check = zeros( 1, dtype=float32 )
+
+    for byte in TxData:
+        _check[0] += byte
+    
+    buffer = packet.Txheader + TxData.tobytes() + _check.tobytes()
+
+    packet.write( buffer )
+
